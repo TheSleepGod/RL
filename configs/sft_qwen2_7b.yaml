@@ -10,7 +10,6 @@ data:
   train_path: data/train.jsonl
   val_path: data/val.jsonl
   max_seq_length: 2048
-  # 使用简单统一模板，便于只训助手
   response_template: "### 助手\n"
 
 train:
