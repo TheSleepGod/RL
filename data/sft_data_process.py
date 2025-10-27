@@ -6,14 +6,6 @@ import torch
 from torch.utils.data import Dataset
 
 class SimpleDataset(Dataset):
-    """
-    Each item is a dict with:
-      - input_ids: List[int]
-      - labels: List[int] (prompt=-100, response=token ids)
-      - attention_mask: List[int]
-      - prompt_len: int
-      - id/meta (optional passthrough)
-    """
     def __init__(self, examples: List[Dict]):
         self.examples = examples
 
@@ -153,62 +145,14 @@ class DataProcessor:
             self.stats["from_pair"] += 1
         return ex
 
-    def _tokenize_pair(self, prompt_text: str, assistant_text: str, rec: Dict) -> Optional[Dict]:
-        p_ids = self.tok(prompt_text, add_special_tokens=False).input_ids
-        r_ids = self.tok(assistant_text + (self.tok.eos_token or ""), add_special_tokens=False).input_ids
-
-        if len(p_ids) >= self.max_seq_len:
-            self.stats["prompt_overlength"] += 1
-            rid = rec.get("id", "<unknown>")
-            self._warn(f"[DataProcessor] prompt too long (len={len(p_ids)} >= max_seq_len={self.max_seq_len}) for id={rid}. "
-                       f"Keeping sample with labels all -100 (no supervised tokens).")
-            p_ids = p_ids[-self.max_seq_len:]
-            input_ids = p_ids
-            labels = [-100] * len(input_ids)
-            attention_mask = [1] * len(input_ids)
-            prompt_len = len(p_ids)
-
-            self._accu_len(prompt_len, len(input_ids))
-            self.stats["no_supervised_samples"] += 1
-            ex = {"input_ids": input_ids, "labels": labels, "attention_mask": attention_mask, "prompt_len": prompt_len}
-            if "id" in rec: ex["id"] = rec["id"]
-            if "meta" in rec: ex["meta"] = rec["meta"]
-            return ex
-
-        remain = self.max_seq_len - len(p_ids)
-        truncated_prompt = False
-        truncated_response = False
-
-        if len(r_ids) > remain:
-            if self.truncate == "response_tail":
-                r_ids = r_ids[:remain]
-                truncated_response = True
-            else:
-                needed = len(r_ids) - remain
-                if needed < len(p_ids):
-                    p_ids = p_ids[needed:]
-                    truncated_prompt = True
-                else:
-                    r_ids = r_ids[:remain]
-                    truncated_response = True
-
-        if truncated_prompt:
-            rid = rec.get("id", "<unknown>")
-            self.stats["truncate_prompt"] += 1
-            self._warn(f"[DataProcessor] truncated prompt head to fit response (id={rid}).")
-        if truncated_response:
-            rid = rec.get("id", "<unknown>")
-            self.stats["truncate_response"] += 1
-            self._warn(f"[DataProcessor] truncated response tail to fit max_seq_len (id={rid}).")
-
+    def _make_example(self, p_ids: List[int], r_ids: List[int], rec: Dict) -> Dict:
         input_ids = p_ids + r_ids
         labels = [-100] * len(p_ids) + r_ids
         attention_mask = [1] * len(input_ids)
         prompt_len = len(p_ids)
 
-        if all(l == -100 for l in labels):
+        if not r_ids or all(l == -100 for l in labels):
             self.stats["no_supervised_samples"] += 1
-
         self._accu_len(prompt_len, len(input_ids))
 
         ex = {"input_ids": input_ids, "labels": labels, "attention_mask": attention_mask, "prompt_len": prompt_len}
@@ -216,16 +160,46 @@ class DataProcessor:
         if "meta" in rec: ex["meta"] = rec["meta"]
         return ex
 
+    def _tokenize_pair(self, prompt_text: str, assistant_text: str, rec: Dict) -> Optional[Dict]:
+        p_ids = self.tok(prompt_text, add_special_tokens=False).input_ids
+        r_ids = self.tok(assistant_text + (self.tok.eos_token or ""), add_special_tokens=False).input_ids
+        rid = rec.get("id", "<unknown>")
+
+        if len(p_ids) >= self.max_seq_len:
+            self.stats["prompt_overlength"] += 1
+            self._warn(f"[DataProcessor] prompt too long ({len(p_ids)} >= {self.max_seq_len}) for id={rid}; "
+                    f"keep sample with labels all -100.")
+            p_ids = p_ids[-self.max_seq_len:]  # 保留尾部以尽量保留 response_template
+            return self._make_example(p_ids, [], rec)
+
+        remain = self.max_seq_len - len(p_ids)
+        if len(r_ids) > remain:
+            if self.truncate == "response_tail":
+                r_ids = r_ids[:remain]
+                self.stats["truncate_response"] += 1
+                self._warn(f"[DataProcessor] truncated response tail to fit max_seq_len (id={rid}).")
+            else:
+                needed = len(r_ids) - remain
+                if needed < len(p_ids):
+                    p_ids = p_ids[needed:]
+                    self.stats["truncate_prompt"] += 1
+                    self._warn(f"[DataProcessor] truncated prompt head to fit response (id={rid}).")
+                else:
+                    r_ids = r_ids[:remain]
+                    self.stats["truncate_response"] += 1
+                    self._warn(f"[DataProcessor] truncated response tail to fit max_seq_len (id={rid}).")
+
+        return self._make_example(p_ids, r_ids, rec)
+
     def _process_file(self, path: str) -> List[Dict]:
         out: List[Dict] = []
         for rec in read_jsonl(path):
             self.stats["total"] += 1
+            ex = None
             if "messages" in rec:
                 ex = self._from_messages(rec)
             elif ("instruction" in rec) or ("output" in rec):
                 ex = self._from_pair(rec)
-            else:
-                ex = None
             if ex is not None:
                 out.append(ex)
         return out
