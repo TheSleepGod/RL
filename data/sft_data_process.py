@@ -1,9 +1,10 @@
 # data_processor_sft.py
 import json
-import warnings
-from typing import List, Dict, Optional, Iterable, Callable
 import torch
+import warnings
 from torch.utils.data import Dataset
+from typing import List, Dict, Optional, Iterable, Callable
+
 
 class SimpleDataset(Dataset):
     def __init__(self, examples: List[Dict]):
