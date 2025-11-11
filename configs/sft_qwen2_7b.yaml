@@ -2,21 +2,21 @@ seed: 42
 packing: false
 
 model:
-  name: Qwen/Qwen2-7B
+  name: /opt/tiger/model/Qwen2-7B
   torch_dtype: bf16
   attn_impl: sdpa
 
 data:
-  train_path: data/train.jsonl
-  val_path: data/val.jsonl
+  train_path: data/all_data/gsm8k_train.jsonl
+  val_path: data/all_data/gsm8k_val.jsonl
   max_seq_length: 2048
   response_template: "### 助手\n"
 
 train:
   output_dir: out/sft_qwen2_7b
-  per_device_train_batch_size: 2
-  per_device_eval_batch_size: 2
-  gradient_accumulation_steps: 16
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 32
   num_train_epochs: 2
   learning_rate: 2.0e-4
   lr_scheduler_type: cosine
@@ -29,9 +29,10 @@ train:
   save_total_limit: 3
   bf16: true
   fp16: false
-  gradient_checkpointing: true
+  gradient_checkpointing: false
   ddp_find_unused_parameters: false
   report_to: none
+
 
 lora:
   r: 16
