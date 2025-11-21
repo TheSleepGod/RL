@@ -21,12 +21,11 @@ class ModelManager:
         print(f"Loading base model from: {self.base_model_path}")
         base_model = AutoModelForCausalLM.from_pretrained(
             self.base_model_path,
-            torch_dtype=torch_dtype,
-            device_map=device
+            torch_dtype=torch_dtype
         )
 
         print(f"Loading LoRA adapter from: {lora_adapter_path}")
-        lora_model = PeftModel.from_pretrained(base_model, lora_adapter_path, device_map=device)
+        lora_model = PeftModel.from_pretrained(base_model, lora_adapter_path)
 
         print("Merging LoRA weights into the base model...")
         merged_model = lora_model.merge_and_unload()
@@ -58,7 +57,6 @@ class ModelManager:
     def load_model_from_path(
         model_path: str,
         torch_dtype: torch.dtype = torch.bfloat16,
-        device_map: str = "auto",
         use_cache: bool = True
     ) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
         print(f"--- Method 3: Loading a full model from path ---")
@@ -69,7 +67,6 @@ class ModelManager:
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
-            device_map=device_map,
             use_cache=use_cache
         )
         tokenizer = AutoTokenizer.from_pretrained(model_path)

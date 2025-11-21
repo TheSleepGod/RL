@@ -1,27 +1,91 @@
 seed: 42
 base_model_path: "/opt/tiger/model/Qwen2-7B"
-sft_adapter_path: "out/sft_qwen2_7b/final" # SFT 训练好的 LoRA 适配器
+sft_adapter_path: "out/sft_qwen2_7b/final"
 
-dataset_path: "data/all_data/gsm8k_train.jsonl" # 用于 RL 训练的 prompt 数据集
-max_prompt_length: 1024 # prompt 的最大长度
-max_response_length: 1024 # 生成 response 的最大长度
+model:
+  base_model_path: "/opt/tiger/model/Qwen2-7B" # 原始的基础模型
+  lora_adapter_path: "out/sft_qwen2_7b/final"     # SFT 训练产出的 LoRA adapter 路径
+  torch_dtype: "bf16"
+  attn_impl: "flash_attention_2" # or "sdpa"
 
-ppo_epochs: 4          # 每次 PPO 更新时，在同一批数据上训练的轮数
-num_train_epochs: 1    # 总的训练轮数
-learning_rate: 1.41e-5
-batch_size: 8          # 每次 PPO 迭代生成的 prompt 数量
-mini_batch_size: 2     # PPO 更新时使用的 mini-batch 大小
-gradient_accumulation_steps: 4
+data:
+  path: "/mnt/bn/search-nlp-us/haohanwen/haohw/data/all_data/gsm8k_train.jsonl"
+  max_prompt_len: 512
+  response_template: "### 助手\n" # 必须与 SFT 阶段完全一致
+  include_system: false
 
-adap_kl_ctrl: false    # 是否使用自适应 KL 控制器
-init_kl_coef: 0.2      # 初始 KL 系数 (beta)
-target: 6              # 目标 KL 值 (如果使用自适应 KL)
-horizon: 10000         # 自适应 KL 的 horizon
+ppo:
+  learning_rate: 1.0e-5
+  batch_size: 32
+  mini_batch_size: 8
+  gradient_accumulation_steps: 4
+  gamma: 1.0
+  lam: 0.95
 
-temperature: 0.7
-top_k: 0
-top_p: 1.0
+trainer:
+  init_kl_coef: 0.1
+  adap_kl_ctrl: true
+  target_kl: 6.0
+  clip_epsilon: 0.2
+  use_score_scaling: false
+  use_score_norm: false
 
-output_dir: "out/rl_qwen2_7b"
-logging_steps: 10
-save_steps: 100
+loss:
+  name: "calibrated"  # 在 loss_functions.py 中注册的名字
+  # 'vanilla' -> 标准 PPO 奖励
+  # 'calibrated' -> 你设想的、考虑先验置信度的版本
+  # 传递给你自定义损失函数的额外参数
+  kwargs:
+    alpha: 0.5        # 例如，你的自信错误惩罚系数
+
+train:
+  num_epochs: 2
+  output_dir: "out/ppo_model"
+  logging_steps: 10
+  save_steps: 100
+  report_to: "wandb"
+  wandb_project: "rlhf-confidence-debug"
+
+# configs/ppo_config.yaml
+
+seed: 42
+
+base_model_path: "/opt/tiger/model/Qwen2-7B"
+sft_adapter_path: "out/sft_qwen2_7b/final"
+
+reward_model_path: "weqweasdas/hh_rlhf_rm_open_llama_3b"
+
+data:
+  path: "data/ppo_prompts.jsonl"
+  max_prompt_len: 512
+  response_template: "### 助手\n"
+
+ppo:
+  learning_rate: 1.0e-5
+  batch_size: 16                    
+  mini_batch_size: 4                
+  gradient_accumulation_steps: 4
+  gamma: 1.0
+  lam: 0.95
+
+  init_kl_coef: 0.1
+  adap_kl_ctrl: true
+  target_kl: 6.0
+  cliprange: 0.2
+  
+  use_score_scaling: false
+  use_score_norm: false
+  ppo_epochs: 4
+  
+loss:
+  name: "vanilla" # 先用 vanilla 跑通
+  kwargs:
+    alpha: 0.5
+
+# 训练流程控制
+train:
+  num_epochs: 1                     # PPO 训练通常不需要很多 epoch
+  output_dir: "out/ppo_model"
+  generation_max_new_tokens: 128    # 生成 response 的最大长度
+  report_to: "wandb"
+  wandb_project: "rlhf-from-scratch"

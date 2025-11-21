@@ -3,7 +3,7 @@ import torch
 import warnings
 from torch.utils.data import Dataset, DataLoader
 from typing import List, Dict, Optional, Iterable, Callable
-from utils import SimpleDataset, read_jsonl
+from data.utils import SimpleDataset, read_jsonl
 
 
 class PPODataProcessor:

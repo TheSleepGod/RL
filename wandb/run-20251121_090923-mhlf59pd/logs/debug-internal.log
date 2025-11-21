@@ -1,0 +1,11 @@
+{"time":"2025-11-21T09:09:24.239432252Z","level":"INFO","msg":"stream: starting","core version":"0.22.2"}
+{"time":"2025-11-21T09:09:24.465109428Z","level":"INFO","msg":"stream: created new stream","id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:24.46517157Z","level":"INFO","msg":"handler: started","stream_id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:24.47822255Z","level":"INFO","msg":"stream: started","id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:24.478246969Z","level":"INFO","msg":"writer: started","stream_id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:24.478248151Z","level":"INFO","msg":"sender: started","stream_id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:32.796034755Z","level":"INFO","msg":"stream: closing","id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:33.066678596Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-11-21T09:09:33.192332154Z","level":"INFO","msg":"handler: closed","stream_id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:33.196327296Z","level":"INFO","msg":"sender: closed","stream_id":"mhlf59pd"}
+{"time":"2025-11-21T09:09:33.196335353Z","level":"INFO","msg":"stream: closed","id":"mhlf59pd"}

@@ -1,0 +1,11 @@
+{"time":"2025-11-21T09:51:14.313544166Z","level":"INFO","msg":"stream: starting","core version":"0.22.2"}
+{"time":"2025-11-21T09:51:14.602193021Z","level":"INFO","msg":"stream: created new stream","id":"bymovhmq"}
+{"time":"2025-11-21T09:51:14.602248589Z","level":"INFO","msg":"handler: started","stream_id":"bymovhmq"}
+{"time":"2025-11-21T09:51:14.618437452Z","level":"INFO","msg":"stream: started","id":"bymovhmq"}
+{"time":"2025-11-21T09:51:14.618447859Z","level":"INFO","msg":"writer: started","stream_id":"bymovhmq"}
+{"time":"2025-11-21T09:51:14.618458265Z","level":"INFO","msg":"sender: started","stream_id":"bymovhmq"}
+{"time":"2025-11-21T09:51:22.70153618Z","level":"INFO","msg":"stream: closing","id":"bymovhmq"}
+{"time":"2025-11-21T09:51:22.994336451Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-11-21T09:51:23.160154623Z","level":"INFO","msg":"handler: closed","stream_id":"bymovhmq"}
+{"time":"2025-11-21T09:51:23.168371061Z","level":"INFO","msg":"sender: closed","stream_id":"bymovhmq"}
+{"time":"2025-11-21T09:51:23.168386695Z","level":"INFO","msg":"stream: closed","id":"bymovhmq"}
