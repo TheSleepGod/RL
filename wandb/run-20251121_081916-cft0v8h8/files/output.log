@@ -1,7 +1,0 @@
-==================== Loading Models ====================
-[Warning] 基础模型路径 'meta-llama/Llama-2-7b-hf' 不存在。请确保这是一个有效的 Hugging Face 模型标识符或本地路径。
-ModelManager initialized with base model path: meta-llama/Llama-2-7b-hf
---- Loading and merging LoRA adapter using ModelManager ---
---- Method 1: Merging LoRA to model in memory ---
-Loading base model from: meta-llama/Llama-2-7b-hf
-[34m[1mwandb[0m: 500 encountered ({"errors":[{"message":"An internal error occurred. Please contact support.","path":["upsertBucket"]}],"data":{"upsertBucket":null}}), retrying request
