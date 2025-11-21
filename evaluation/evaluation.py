@@ -5,7 +5,7 @@ import json
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from typing import List, Dict, Any
-from .metrics import Metric  # 从同级目录的 metrics.py 导入
+from evaluation.metric import Metric  # 从同级目录的 metrics.py 导入
 
 class Evaluator:
     def __init__(self, model, tokenizer):

@@ -16,7 +16,6 @@ def load_config(path: str) -> Dict[str, Any]:
         return yaml.safe_load(f)
 
 def cast_val(v: str):
-    # 简易类型推断（int/float/bool/str）
     if v.isdigit(): return int(v)
     try:
         return float(v)
@@ -27,7 +26,6 @@ def cast_val(v: str):
     return v
 
 def apply_overrides(cfg: Dict[str, Any], overrides):
-    # 支持 --set a.b.c=val
     for it in overrides or []:
         if "=" not in it:
             print(f"[WARN] override '{it}' ignored (expected key=value)."); continue
@@ -48,7 +46,6 @@ def ensure_schema(ds, required=("input_ids","labels","attention_mask")):
                          f"Expected tokenized JSONL with fields {required}. "
                          f"Got keys={list(sample.keys())[:10]} ...")
 
-# ---------- main ----------
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True, help="YAML 配置文件")

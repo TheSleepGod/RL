@@ -1,0 +1,27 @@
+seed: 42
+base_model_path: "/opt/tiger/model/Qwen2-7B"
+sft_adapter_path: "out/sft_qwen2_7b/final" # SFT 训练好的 LoRA 适配器
+
+dataset_path: "data/all_data/gsm8k_train.jsonl" # 用于 RL 训练的 prompt 数据集
+max_prompt_length: 1024 # prompt 的最大长度
+max_response_length: 1024 # 生成 response 的最大长度
+
+ppo_epochs: 4          # 每次 PPO 更新时，在同一批数据上训练的轮数
+num_train_epochs: 1    # 总的训练轮数
+learning_rate: 1.41e-5
+batch_size: 8          # 每次 PPO 迭代生成的 prompt 数量
+mini_batch_size: 2     # PPO 更新时使用的 mini-batch 大小
+gradient_accumulation_steps: 4
+
+adap_kl_ctrl: false    # 是否使用自适应 KL 控制器
+init_kl_coef: 0.2      # 初始 KL 系数 (beta)
+target: 6              # 目标 KL 值 (如果使用自适应 KL)
+horizon: 10000         # 自适应 KL 的 horizon
+
+temperature: 0.7
+top_k: 0
+top_p: 1.0
+
+output_dir: "out/rl_qwen2_7b"
+logging_steps: 10
+save_steps: 100

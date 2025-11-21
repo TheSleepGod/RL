@@ -3,24 +3,7 @@ import torch
 import warnings
 from torch.utils.data import Dataset
 from typing import List, Dict, Optional, Iterable, Callable
-
-
-class SimpleDataset(Dataset):
-    def __init__(self, examples: List[Dict]):
-        self.examples = examples
-
-    def __len__(self):
-        return len(self.examples)
-
-    def __getitem__(self, idx):
-        return self.examples[idx]
-
-def read_jsonl(path: str) -> Iterable[Dict]:
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
+from utils import SimpleDataset, read_jsonl
 
 class DataProcessor:
     def __init__(
@@ -31,9 +14,9 @@ class DataProcessor:
         response_template: str = "### 助手\n",
         max_seq_len: int = 1024,
         include_system: bool = False,
-        truncate: str = "response_tail",  # or "prompt_tail"
+        truncate: str = "response_tail",
         warn_overlength: bool = True,
-        warn_limit: int = 20,             # 最多打印的详细 warning 条数（避免刷屏）
+        warn_limit: int = 20,
     ):
         assert truncate in {"response_tail", "prompt_tail"}
         self.tok = tokenizer
@@ -46,7 +29,6 @@ class DataProcessor:
         self.warn_overlength = bool(warn_overlength)
         self.warn_limit = int(warn_limit)
 
-        # 统计与限流
         self._warn_count = 0
         self.stats = {
             "total": 0,

@@ -1,10 +1,10 @@
 # run_evaluation.py
 
 import json
-from model_utils import ModelManager
+from model.model_utils import ModelManager
 from data.sft_data_process import DataProcessor
-from evaluation.evaluator import Evaluator
-from evaluation.metrics import Accuracy, postprocess_gsm8k_answer
+from evaluation.evaluation import Evaluator
+from evaluation.metric import Accuracy, postprocess_gsm8k_answer
 
 BASE_MODEL_PATH = "/opt/tiger/model/Qwen2-7B"
 
